@@ -31,9 +31,15 @@
     <string name="chat_status_ready">Ready to listen and speak</string>
     <string name="chat_status_not_listening">Not listening</string>
     <string name="chat_status_mic_denied">Microphone permission denied</string>
+    <string name="chat_status_speaking">Speaking reply aloud</string>
+    <string name="chat_status_speech_done">Reply spoken aloud</string>
     <string name="chat_input_hint">Type a reply</string>
     <string name="chat_listen">Listen</string>
     <string name="chat_stop">Stop</string>
+    <string name="chat_stop_speaking">Stop Voice</string>
+    <string name="chat_replay">Replay</string>
+    <string name="chat_voice_label">Voice</string>
+    <string name="chat_live_transcript_hint">Live transcript will appear here while listening.</string>
     <string name="chat_send">Send</string>
     <string name="chat_smart_replies_title">Smart replies</string>
     <string name="icon_wave">Wave icon</string>

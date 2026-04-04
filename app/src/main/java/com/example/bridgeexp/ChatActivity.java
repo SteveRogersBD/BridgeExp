@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bridgeexp.audio.AudioManagerFacade;
 import com.example.bridgeexp.audio.VoiceProfileRegistry;
+import com.example.bridgeexp.audio.model.ConversationAudioState;
 import com.example.bridgeexp.audio.model.SpeechResult;
 import com.example.bridgeexp.audio.model.TranscriptResult;
 import com.example.bridgeexp.audio.model.VoiceProfile;
@@ -41,6 +42,9 @@ public class ChatActivity extends AppCompatActivity {
     private AudioManagerFacade audioManagerFacade;
     private VoiceProfile activeVoiceProfile;
     private boolean isListening;
+    private boolean isSpeaking;
+    private String lastSpokenText = "";
+    private String liveTranscript = "";
 
     private final List<com.example.bridgeexp.chat.model.ChatMessage> currentMessages =
             new ArrayList<>();
@@ -72,6 +76,7 @@ public class ChatActivity extends AppCompatActivity {
         setupActions();
         updateSendState();
         updateListenButtonState(false);
+        renderAudioState();
     }
 
     @Override
@@ -86,20 +91,28 @@ public class ChatActivity extends AppCompatActivity {
         audioManagerFacade.initializeTts(new TextToSpeechManager.Listener() {
             @Override
             public void onReady() {
-                binding.liveStatusText.setText(R.string.chat_status_ready);
+                renderAudioState();
             }
 
             @Override
             public void onSpeechStarted(String utteranceId) {
+                isSpeaking = true;
+                binding.liveStatusText.setText(R.string.chat_status_speaking);
+                renderAudioState();
             }
 
             @Override
             public void onSpeechCompleted(SpeechResult result) {
+                isSpeaking = false;
+                binding.liveStatusText.setText(R.string.chat_status_speech_done);
+                renderAudioState();
             }
 
             @Override
             public void onError(String message) {
+                isSpeaking = false;
                 binding.liveStatusText.setText(message);
+                renderAudioState();
             }
         });
     }
@@ -137,6 +150,9 @@ public class ChatActivity extends AppCompatActivity {
         binding.backButton.setOnClickListener(view -> finish());
         binding.sendButton.setOnClickListener(view -> sendCurrentMessage());
         binding.listenButton.setOnClickListener(view -> toggleListening());
+        binding.replayButton.setOnClickListener(view -> replayLastSpokenText());
+        binding.stopSpeakingButton.setOnClickListener(view -> stopSpeaking());
+        binding.voiceProfileText.setOnClickListener(view -> cycleVoiceProfile());
         binding.messageInput.setOnEditorActionListener((textView, actionId, keyEvent) -> {
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEND
                     || (keyEvent != null
@@ -169,6 +185,7 @@ public class ChatActivity extends AppCompatActivity {
             isListening = false;
             binding.liveStatusText.setText(R.string.chat_status_not_listening);
             updateListenButtonState(false);
+            renderAudioState();
             return;
         }
 
@@ -189,19 +206,23 @@ public class ChatActivity extends AppCompatActivity {
                         isListening = true;
                         binding.liveStatusText.setText(R.string.chat_status_listening);
                         updateListenButtonState(true);
+                        liveTranscript = "";
+                        renderAudioState();
                     }
 
                     @Override
                     public void onPartialTranscript(TranscriptResult result) {
-                        binding.messageInput.setText(result.getText());
-                        binding.messageInput.setSelection(result.getText().length());
+                        liveTranscript = result.getText();
+                        renderAudioState();
                     }
 
                     @Override
                     public void onFinalTranscript(TranscriptResult result) {
                         isListening = false;
+                        liveTranscript = result.getText();
                         updateListenButtonState(false);
                         binding.liveStatusText.setText(R.string.chat_status_ready);
+                        renderAudioState();
                         appendIncomingMessage(result.getText());
                     }
 
@@ -209,6 +230,7 @@ public class ChatActivity extends AppCompatActivity {
                     public void onListeningStopped() {
                         isListening = false;
                         updateListenButtonState(false);
+                        renderAudioState();
                     }
 
                     @Override
@@ -216,6 +238,7 @@ public class ChatActivity extends AppCompatActivity {
                         isListening = false;
                         updateListenButtonState(false);
                         binding.liveStatusText.setText(message);
+                        renderAudioState();
                     }
                 }
         );
@@ -241,7 +264,9 @@ public class ChatActivity extends AppCompatActivity {
         currentMessages.add(message);
         chatAdapter.submitList(currentMessages);
         binding.messageInput.setText("");
+        lastSpokenText = text;
         audioManagerFacade.speakText(text, activeVoiceProfile);
+        renderAudioState();
         scrollToBottom();
     }
 
@@ -263,8 +288,42 @@ public class ChatActivity extends AppCompatActivity {
 
         currentMessages.add(message);
         chatAdapter.submitList(currentMessages);
-        binding.messageInput.setText("");
+        liveTranscript = "";
+        renderAudioState();
         scrollToBottom();
+    }
+
+    private void replayLastSpokenText() {
+        if (lastSpokenText == null || lastSpokenText.trim().isEmpty()) {
+            return;
+        }
+        audioManagerFacade.speakText(lastSpokenText, activeVoiceProfile);
+    }
+
+    private void stopSpeaking() {
+        audioManagerFacade.stopSpeaking();
+        isSpeaking = false;
+        binding.liveStatusText.setText(R.string.chat_status_ready);
+        renderAudioState();
+    }
+
+    private void cycleVoiceProfile() {
+        List<VoiceProfile> profiles = VoiceProfileRegistry.getDefaultProfiles();
+        if (profiles.isEmpty()) {
+            return;
+        }
+
+        int currentIndex = 0;
+        for (int i = 0; i < profiles.size(); i++) {
+            if (profiles.get(i).getId().equals(activeVoiceProfile.getId())) {
+                currentIndex = i;
+                break;
+            }
+        }
+
+        int nextIndex = (currentIndex + 1) % profiles.size();
+        activeVoiceProfile = profiles.get(nextIndex);
+        renderAudioState();
     }
 
     private void updateSendState() {
@@ -286,6 +345,30 @@ public class ChatActivity extends AppCompatActivity {
         binding.listenButton.setTextColor(getColor(
                 listening ? R.color.bridge_toggle_active_text : R.color.bridge_text_primary
         ));
+    }
+
+    private void renderAudioState() {
+        ConversationAudioState audioState = new ConversationAudioState(
+                isListening,
+                isSpeaking,
+                false,
+                activeVoiceProfile,
+                liveTranscript
+        );
+
+        binding.voiceProfileText.setText(audioState.getActiveVoiceProfile().getDisplayName());
+        binding.replayButton.setAlpha(lastSpokenText.isEmpty() ? 0.45f : 1f);
+        binding.replayButton.setEnabled(!lastSpokenText.isEmpty());
+        binding.stopSpeakingButton.setAlpha(audioState.isSpeaking() ? 1f : 0.45f);
+        binding.stopSpeakingButton.setEnabled(audioState.isSpeaking());
+
+        if (audioState.getLastTranscript() == null || audioState.getLastTranscript().isEmpty()) {
+            binding.liveTranscriptPreview.setText(R.string.chat_live_transcript_hint);
+            binding.liveTranscriptPreview.setTextColor(getColor(R.color.bridge_text_muted));
+        } else {
+            binding.liveTranscriptPreview.setText(audioState.getLastTranscript());
+            binding.liveTranscriptPreview.setTextColor(getColor(R.color.bridge_text_primary));
+        }
     }
 
     private void scrollToBottom() {

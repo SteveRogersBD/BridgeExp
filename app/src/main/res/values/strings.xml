@@ -1,3 +1,31 @@
 <resources>
-    <string name="app_name">BridgeExp</string>
+    <string name="app_name">Bridge</string>
+    <string name="home_brand">Bridge</string>
+    <string name="home_badge">AI-powered communication</string>
+    <string name="home_title">Real-time communication without barriers.</string>
+    <string name="home_subtitle">Translate signs, preserve a personal voice, read emotional nuance, and move conversations forward with intelligent replies.</string>
+    <string name="home_cta">Start Conversation</string>
+    <string name="home_secondary">Built for live, natural connection</string>
+    <string name="home_section_label">Core experiences</string>
+    <string name="home_preview_label">Live communication preview</string>
+    <string name="home_preview_title">A screen that understands both words and feeling.</string>
+    <string name="home_preview_sign">I can meet you downstairs in ten minutes.</string>
+    <string name="home_preview_reply">Reply suggestion: “Perfect, I’m on my way.”</string>
+    <string name="home_preview_voice">Voice output: Maya\'s donated voice</string>
+    <string name="home_chip_emotion">Calm</string>
+    <string name="home_chip_live">Live</string>
+    <string name="feature_sign_title">Sign to Speech</string>
+    <string name="feature_sign_body">Live gesture recognition turns sign language into readable text and natural voice output.</string>
+    <string name="feature_voice_title">Personal Voice</string>
+    <string name="feature_voice_body">Give spoken responses warmth and identity with a voice that feels familiar.</string>
+    <string name="feature_emotion_title">Emotion Insight</string>
+    <string name="feature_emotion_body">Surface tone, pace, and urgency so meaning is never lost between the lines.</string>
+    <string name="feature_reply_title">Smart Replies</string>
+    <string name="feature_reply_body">Offer one-tap responses that stay grounded in the conversation’s full context.</string>
+    <string name="home_story_title">Designed for conversations that move fast and matter deeply.</string>
+    <string name="home_story_body">Bridge blends translation, voice, and emotional context into one calm interface so the technology fades into the background and people stay connected.</string>
+    <string name="icon_wave">Wave icon</string>
+    <string name="icon_voice">Voice icon</string>
+    <string name="icon_emotion">Emotion icon</string>
+    <string name="icon_reply">Reply icon</string>
 </resources>

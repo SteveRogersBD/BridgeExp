@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="@color/bridge_midnight"
+                android:startColor="@color/bridge_navy" />
+        </shape>
+    </item>
+
+    <item
+        android:top="-120dp"
+        android:right="-80dp">
+        <shape android:shape="oval">
+            <size
+                android:width="280dp"
+                android:height="280dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="160dp"
+                android:centerColor="#6639E0D5"
+                android:endColor="#0039E0D5"
+                android:startColor="#9939E0D5" />
+        </shape>
+    </item>
+
+    <item
+        android:bottom="-170dp"
+        android:left="-120dp">
+        <shape android:shape="oval">
+            <size
+                android:width="340dp"
+                android:height="340dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="190dp"
+                android:centerColor="#555C9DFF"
+                android:endColor="#005C9DFF"
+                android:startColor="#885C9DFF" />
+        </shape>
+    </item>
+</layer-list>

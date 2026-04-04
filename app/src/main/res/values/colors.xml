@@ -2,4 +2,19 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="bridge_midnight">#08111F</color>
+    <color name="bridge_navy">#10213A</color>
+    <color name="bridge_teal">#1CC7C1</color>
+    <color name="bridge_teal_bright">#74F2E8</color>
+    <color name="bridge_sky">#7BC6FF</color>
+    <color name="bridge_text_primary">#F4F8FF</color>
+    <color name="bridge_text_secondary">#A8B7D3</color>
+    <color name="bridge_text_muted">#7D91B4</color>
+    <color name="bridge_card">#1A20344A</color>
+    <color name="bridge_card_border">#33B8E8FF</color>
+    <color name="bridge_chip_bg">#1FC4D7D9</color>
+    <color name="bridge_chip_text">#D9FFFD</color>
+    <color name="bridge_button_start">#27D3CB</color>
+    <color name="bridge_button_end">#5BA8FF</color>
+    <color name="bridge_preview_surface">#141D3040</color>
 </resources>

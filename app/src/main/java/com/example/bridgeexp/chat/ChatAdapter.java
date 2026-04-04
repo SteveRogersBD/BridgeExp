@@ -19,6 +19,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_OTHER = 0;
     private static final int TYPE_USER = 1;
+    private static final int TYPE_SYSTEM = 2;
 
     private final List<ChatMessage> messages = new ArrayList<>();
 
@@ -30,7 +31,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return messages.get(position).getSender() == MessageSender.USER ? TYPE_USER : TYPE_OTHER;
+        MessageSender sender = messages.get(position).getSender();
+        if (sender == MessageSender.USER) {
+            return TYPE_USER;
+        }
+        if (sender == MessageSender.SYSTEM) {
+            return TYPE_SYSTEM;
+        }
+        return TYPE_OTHER;
     }
 
     @NonNull
@@ -43,6 +51,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return new UserMessageViewHolder(view);
         }
 
+        if (viewType == TYPE_SYSTEM) {
+            View view = inflater.inflate(R.layout.item_message_system, parent, false);
+            return new SystemMessageViewHolder(view);
+        }
+
         View view = inflater.inflate(R.layout.item_message_other, parent, false);
         return new OtherMessageViewHolder(view);
     }
@@ -53,6 +66,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         if (holder instanceof UserMessageViewHolder) {
             ((UserMessageViewHolder) holder).bind(message);
+        } else if (holder instanceof SystemMessageViewHolder) {
+            ((SystemMessageViewHolder) holder).bind(message);
         } else if (holder instanceof OtherMessageViewHolder) {
             ((OtherMessageViewHolder) holder).bind(message);
         }
@@ -83,26 +98,34 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static class OtherMessageViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView messageText;
-        private final TextView emotionTagText;
         private final TextView timestampText;
 
         OtherMessageViewHolder(@NonNull View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.messageText);
-            emotionTagText = itemView.findViewById(R.id.emotionTagText);
             timestampText = itemView.findViewById(R.id.timestampText);
         }
 
         void bind(ChatMessage message) {
             messageText.setText(message.getText());
             timestampText.setText(message.getTimestamp());
+        }
+    }
 
-            if (message.getEmotionTag() != null) {
-                emotionTagText.setVisibility(View.VISIBLE);
-                emotionTagText.setText(message.getEmotionTag().getLabel());
-            } else {
-                emotionTagText.setVisibility(View.GONE);
-            }
+    static class SystemMessageViewHolder extends RecyclerView.ViewHolder {
+
+        private final TextView messageText;
+        private final TextView timestampText;
+
+        SystemMessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+            messageText = itemView.findViewById(R.id.messageText);
+            timestampText = itemView.findViewById(R.id.timestampText);
+        }
+
+        void bind(ChatMessage message) {
+            messageText.setText(message.getText());
+            timestampText.setText(message.getTimestamp());
         }
     }
 }

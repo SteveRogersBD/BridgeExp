@@ -27,12 +27,15 @@
     <string name="chat_title">Live Conversation</string>
     <string name="chat_status_listening">Listening and translating</string>
     <string name="chat_status_live">Live</string>
+    <string name="chat_back">Back</string>
     <string name="chat_input_hint">Type a reply</string>
     <string name="chat_send">Send</string>
     <string name="chat_smart_replies_title">Smart replies</string>
     <string name="chat_toggle_sign">Sign Input</string>
     <string name="chat_toggle_voice">Voice Output</string>
     <string name="chat_toggle_emotion">Emotion On</string>
+    <string name="chat_bridge_thinking">Bridge is thinking…</string>
+    <string name="chat_assistant_ready">Assistant-ready conversation flow</string>
     <string name="icon_wave">Wave icon</string>
     <string name="icon_voice">Voice icon</string>
     <string name="icon_emotion">Emotion icon</string>

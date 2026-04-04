@@ -1,6 +1,11 @@
 package com.example.bridgeexp;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,6 +41,7 @@ public class ChatActivity extends AppCompatActivity {
         setupSmartReplies();
         bindState(ConversationMockData.createUiState());
         setupActions();
+        updateSendState();
     }
 
     private void setupMessages() {
@@ -68,7 +74,32 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setupActions() {
+        binding.backButton.setOnClickListener(view -> finish());
         binding.sendButton.setOnClickListener(view -> sendCurrentMessage());
+        binding.messageInput.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEND
+                    || (keyEvent != null
+                    && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                    && keyEvent.getAction() == KeyEvent.ACTION_DOWN)) {
+                sendCurrentMessage();
+                return true;
+            }
+            return false;
+        });
+        binding.messageInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateSendState();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
 
     private void sendCurrentMessage() {
@@ -91,6 +122,17 @@ public class ChatActivity extends AppCompatActivity {
         chatAdapter.submitList(currentMessages);
         binding.messageInput.setText("");
         scrollToBottom();
+    }
+
+    private void updateSendState() {
+        boolean enabled = binding.messageInput.getText() != null
+                && binding.messageInput.getText().toString().trim().length() > 0;
+        binding.sendButton.setEnabled(enabled);
+        binding.sendButton.setClickable(enabled);
+        binding.sendButton.setAlpha(enabled ? 1f : 0.7f);
+        binding.sendButton.setBackgroundResource(
+                enabled ? R.drawable.bg_primary_button : R.drawable.bg_send_button_disabled
+        );
     }
 
     private void scrollToBottom() {

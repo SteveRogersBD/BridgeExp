@@ -14,6 +14,12 @@
     <color name="bridge_card_border">#33B8E8FF</color>
     <color name="bridge_chip_bg">#1FC4D7D9</color>
     <color name="bridge_chip_text">#D9FFFD</color>
+    <color name="bridge_system_bg">#24355A</color>
+    <color name="bridge_system_border">#4D8FB7FF</color>
+    <color name="bridge_toggle_active">#2548A0FF</color>
+    <color name="bridge_toggle_active_text">#E8F7FF</color>
+    <color name="bridge_toggle_inactive">#18243B</color>
+    <color name="bridge_send_disabled">#5F7CA5</color>
     <color name="bridge_button_start">#27D3CB</color>
     <color name="bridge_button_end">#5BA8FF</color>
     <color name="bridge_preview_surface">#141D3040</color>

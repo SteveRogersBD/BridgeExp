@@ -60,7 +60,8 @@
             android:textColor="@color/bridge_text_secondary"
             android:textSize="16sp" />
 
-        <TextView
+        <Button
+            android:id="@+id/start_convo_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
@@ -71,6 +72,7 @@
             android:paddingEnd="22dp"
             android:paddingBottom="14dp"
             android:text="@string/home_cta"
+            android:textAllCaps="false"
             android:textColor="@color/bridge_midnight"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -132,11 +134,11 @@
                     <TextView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
+                        android:contentDescription="@string/icon_wave"
                         android:gravity="center"
-                        android:text="〰"
+                        android:text="~"
                         android:textColor="@color/bridge_teal_bright"
-                        android:textSize="22sp"
-                        android:contentDescription="@string/icon_wave" />
+                        android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -168,11 +170,11 @@
                     <TextView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
+                        android:contentDescription="@string/icon_voice"
                         android:gravity="center"
-                        android:text="◉"
+                        android:text="O"
                         android:textColor="@color/bridge_teal_bright"
-                        android:textSize="20sp"
-                        android:contentDescription="@string/icon_voice" />
+                        android:textSize="20sp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -204,11 +206,11 @@
                     <TextView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
+                        android:contentDescription="@string/icon_emotion"
                         android:gravity="center"
-                        android:text="◌"
+                        android:text="o"
                         android:textColor="@color/bridge_teal_bright"
-                        android:textSize="20sp"
-                        android:contentDescription="@string/icon_emotion" />
+                        android:textSize="20sp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -240,11 +242,11 @@
                     <TextView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
+                        android:contentDescription="@string/icon_reply"
                         android:gravity="center"
-                        android:text="↗"
+                        android:text=">"
                         android:textColor="@color/bridge_teal_bright"
-                        android:textSize="22sp"
-                        android:contentDescription="@string/icon_reply" />
+                        android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="match_parent"

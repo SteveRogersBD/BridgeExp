@@ -31,3 +31,7 @@ class AgentState:
     conversation_history: List[ChatMessage] = field(default_factory=list)
     latest_user_message: str = ""
     recommendation: Optional[RecommendedChat] = None
+
+
+class AgentResponse:
+    pass

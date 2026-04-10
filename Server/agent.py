@@ -87,7 +87,11 @@ def finalize_output(state: AgentState) -> AgentState:
         if text:
             cleaned.append(text)
 
-    return {"recommendations": cleaned}
+    return {
+        "recommendations": cleaned,
+        "user_context": "",
+        "raw_recommendations": "",
+    }
 
 
 # --- Build Graph ---
@@ -125,5 +129,4 @@ if __name__ == "__main__":
     })
 
     # Clean output: just the list
-    for reply in result["recommendations"]:
-        print(reply)
+    print(result["recommendations"])

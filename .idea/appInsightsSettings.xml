@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.bridgeexp" />
+                  <option name="mobileSdkAppId" value="1:597985080292:android:78f34efa9cf387a0828df1" />
+                  <option name="projectId" value="bridge-10dc9" />
+                  <option name="projectNumber" value="597985080292" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

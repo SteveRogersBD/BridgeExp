@@ -1,0 +1,11 @@
+# Firebase credentials
+firebase_bridge_key.json
+
+# Environment
+.env
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

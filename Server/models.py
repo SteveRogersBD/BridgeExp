@@ -7,8 +7,6 @@ class UserProfile:
     user_id: str
     name: str
     communication_style: str
-    preferences: List[str] = field(default_factory=list)
-    accessibility_needs: List[str] = field(default_factory=list)
 
 
 @dataclass

@@ -3,9 +3,12 @@
 import os
 from dotenv import load_dotenv
 from typing import TypedDict, List
+from pydantic import BaseModel, Field
 from langgraph.graph import StateGraph, START, END
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
+from db import get_user
+from memory import extract_and_merge_memory
 
 load_dotenv()
 
@@ -13,15 +16,23 @@ load_dotenv()
 llm = ChatGoogleGenerativeAI(
     model="gemini-3-flash-preview",
     temperature=0,
-    max_output_tokens=512,
 )
+
+
+# --- Structured output schema ---
+class ReplyList(BaseModel):
+    replies: list[str] = Field(description="Exactly 4 short, natural reply suggestions, each under 15 words")
+
+
+# Structured LLM — guarantees ReplyList schema in response
+structured_llm = llm.with_structured_output(ReplyList)
 
 
 # --- State ---
 class AgentState(TypedDict):
+    user_id: str
     conversation_history: str
     user_context: str
-    raw_recommendations: str
     recommendations: List[str]
 
 
@@ -29,68 +40,58 @@ class AgentState(TypedDict):
 #  Node 1: Fetch User Info / Context
 # ──────────────────────────────────────
 def fetch_user_context(state: AgentState) -> AgentState:
-    """Analyze the conversation to extract topic, tone, and intent."""
+    """Pull user profile from Firestore and build a context string."""
 
-    response = llm.invoke([
-        SystemMessage(content=(
-            "You are a conversation analyst. "
-            "Given a chat history, provide a brief summary covering:\n"
-            "- The main topic\n"
-            "- The emotional tone\n"
-            "- What the other person likely expects as a response\n\n"
-            "Keep it to 2-3 sentences max. No bullet points, just plain text."
-        )),
-        HumanMessage(content=state["conversation_history"]),
-    ])
+    user = get_user(state["user_id"])
 
-    return {"user_context": str(response.content)}
+    if user is None:
+        return {"user_context": "No user profile found. Use a neutral, friendly tone."}
+
+    # Build context from basic info + learned memory
+    parts = [f"User name: {user.get('name', 'Unknown')}"]
+
+    memory = user.get("memory", {})
+    for category, value in memory.items():
+        if value:  # skip empty categories
+            label = category.replace("_", " ").title()
+            parts.append(f"{label}: {value}")
+
+    context = "\n".join(parts)
+    return {"user_context": context}
 
 
 # ──────────────────────────────────────
 #  Node 2: Get Recommendations
 # ──────────────────────────────────────
 def get_recommendations(state: AgentState) -> AgentState:
-    """Use the extracted context to generate reply suggestions."""
+    """Use user profile + conversation to generate personalized reply suggestions."""
 
-    response = llm.invoke([
+    result = structured_llm.invoke([
         SystemMessage(content=(
             "You are a reply suggestion engine for people who use assistive technology. "
-            "Given the conversation context below, suggest exactly 4 short, natural replies "
-            "the user could send next. Keep each reply under 15 words.\n\n"
-            "Return ONLY the replies, one per line, numbered 1-4. Nothing else."
+            "You are given the user's profile and the current conversation. "
+            "Generate exactly 4 short, natural replies that match the user's "
+            "communication style and personality. "
+            "Keep each reply under 15 words."
         )),
         HumanMessage(content=(
-            f"Context: {state['user_context']}\n\n"
-            f"Conversation:\n{state['conversation_history']}"
+            f"USER PROFILE:\n{state['user_context']}\n\n"
+            f"CONVERSATION:\n{state['conversation_history']}"
         )),
     ])
 
-    return {"raw_recommendations": str(response.content)}
+    return {"recommendations": result.replies}
 
 
 # ──────────────────────────────────────
 #  Node 3: Finalize Output
 # ──────────────────────────────────────
 def finalize_output(state: AgentState) -> AgentState:
-    """Parse the raw LLM output into a clean list of strings."""
-
-    raw = state["raw_recommendations"]
-    if isinstance(raw, list):
-        raw = "\n".join(str(item) for item in raw)
-    lines = raw.strip().splitlines()
-    cleaned = []
-    for line in lines:
-        text = line.strip()
-        # Strip leading numbers like "1. " or "1) "
-        if text and len(text) > 2 and text[0].isdigit() and text[1] in ".)" :
-            text = text[2:].strip()
-        if text:
-            cleaned.append(text)
+    """Clean pass-through. Schema guarantees the list is already clean."""
 
     return {
-        "recommendations": cleaned,
+        "recommendations": state["recommendations"],
         "user_context": "",
-        "raw_recommendations": "",
     }
 
 
@@ -121,12 +122,17 @@ if __name__ == "__main__":
     Friend: Maybe try that new Thai place downtown?
     """
 
+    TEST_USER_ID = "test_user_001"
+
+    # 1. Run the agent (uses profile from Firestore)
     result = agent.invoke({
+        "user_id": TEST_USER_ID,
         "conversation_history": sample_conversation,
         "user_context": "",
-        "raw_recommendations": "",
         "recommendations": [],
     })
 
-    # Clean output: just the list
-    print(result["recommendations"])
+    print("Recommendations:", result["recommendations"])
+
+    # 2. After conversation ends, update memory with new insights
+    extract_and_merge_memory(TEST_USER_ID, sample_conversation)

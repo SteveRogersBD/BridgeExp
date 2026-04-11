@@ -7,6 +7,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 
+import android.util.Log;
+import org.json.JSONObject;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +31,8 @@ import com.example.bridgeexp.chat.mock.ConversationMockData;
 import com.example.bridgeexp.chat.model.ConversationUiState;
 import com.example.bridgeexp.chat.model.MessageSender;
 import com.example.bridgeexp.chat.model.MessageType;
+import com.example.bridgeexp.chat.LiveAgentClient;
+import com.example.bridgeexp.chat.model.SmartReply;
 import com.example.bridgeexp.databinding.ActivityChatBinding;
 
 import java.util.ArrayList;
@@ -45,6 +50,10 @@ public class ChatActivity extends AppCompatActivity {
     private boolean isSpeaking;
     private String lastSpokenText = "";
     private String liveTranscript = "";
+
+    // Live Agent Integration
+    private LiveAgentClient liveAgentClient;
+    private boolean isLiveMode = true; 
 
     private final List<com.example.bridgeexp.chat.model.ChatMessage> currentMessages =
             new ArrayList<>();
@@ -77,6 +86,34 @@ public class ChatActivity extends AppCompatActivity {
         updateSendState();
         updateListenButtonState(false);
         renderAudioState();
+        setupLiveAgent();
+    }
+
+    private void setupLiveAgent() {
+        liveAgentClient = new LiveAgentClient(new LiveAgentClient.Listener() {
+            @Override
+            public void onSmartRepliesReceived(List<SmartReply> replies) {
+                smartReplyAdapter.submitList(replies);
+            }
+
+            @Override
+            public void onTextMessageReceived(String text) {
+                binding.liveStatusText.setText(text);
+            }
+
+            @Override
+            public void onAudioDataReceived(byte[] data) {
+                // Not used in text-only mode
+            }
+
+            @Override
+            public void onError(String message) {
+                binding.liveStatusText.setText("Error: " + message);
+            }
+        });
+        
+        // Connect automatically
+        liveAgentClient.connect("ws://10.0.2.2:8765", "test_user_001");
     }
 
     @Override
@@ -224,6 +261,16 @@ public class ChatActivity extends AppCompatActivity {
                         binding.liveStatusText.setText(R.string.chat_status_ready);
                         renderAudioState();
                         appendIncomingMessage(result.getText());
+
+                        // --- NEW: Send to Python Agent for Smart Replies ---
+                        try {
+                            JSONObject msg = new JSONObject();
+                            msg.put("user_id", "test_user_001");
+                            msg.put("text", result.getText());
+                            liveAgentClient.sendText(msg.toString());
+                        } catch (Exception e) {
+                            Log.e("ChatActivity", "Failed to send to agent", e);
+                        }
                     }
 
                     @Override

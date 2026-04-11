@@ -58,6 +58,7 @@ public class LiveAgentClient {
             @Override
             public void onMessage(WebSocket webSocket, String text) {
                 try {
+                    Log.d(TAG, "Received message from Python: " + text);
                     JSONObject json = new JSONObject(text);
                     String type = json.optString("type");
 

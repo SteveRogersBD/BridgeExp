@@ -25,13 +25,15 @@ async def handle_connection(websocket):
 
             print(f"[Server] Received text from {user_id}: {user_text}")
 
-            # Run your existing LangGraph agent
-            result = agent_graph.invoke({
+            # Run your existing LangGraph agent asynchronously to not block the socket
+            state_dict = {
                 "user_id": user_id,
                 "conversation_history": user_text, # Feed the transcript
                 "user_context": "",
                 "recommendations": [],
-            })
+            }
+            result = await asyncio.to_thread(agent_graph.invoke, state_dict)
+
 
             # Send the 4 recommendations back to Android
             response = {

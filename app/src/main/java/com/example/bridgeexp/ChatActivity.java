@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bridgeexp.audio.AudioManagerFacade;
 import com.example.bridgeexp.audio.VoiceProfileRegistry;
@@ -113,7 +114,7 @@ public class ChatActivity extends AppCompatActivity {
         });
         
         // Connect automatically
-        liveAgentClient.connect("ws://10.0.2.2:8765", "test_user_001");
+        liveAgentClient.connect("ws://192.168.1.249:8765", "test_user_001");
     }
 
     @Override
@@ -158,6 +159,15 @@ public class ChatActivity extends AppCompatActivity {
         chatAdapter = new ChatAdapter();
         binding.messagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.messagesRecyclerView.setAdapter(chatAdapter);
+        
+        chatAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                if (chatAdapter.getItemCount() > 0) {
+                    binding.messagesRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+                }
+            }
+        });
     }
 
     private void setupSmartReplies() {
@@ -178,7 +188,7 @@ public class ChatActivity extends AppCompatActivity {
 
         currentMessages.clear();
         currentMessages.addAll(uiState.getMessages());
-        chatAdapter.submitList(currentMessages);
+        chatAdapter.submitList(new ArrayList<>(currentMessages));
         smartReplyAdapter.submitList(uiState.getSmartReplies());
         scrollToBottom();
     }
@@ -309,12 +319,24 @@ public class ChatActivity extends AppCompatActivity {
                 );
 
         currentMessages.add(message);
-        chatAdapter.submitList(currentMessages);
+        chatAdapter.submitList(new ArrayList<>(currentMessages));
         binding.messageInput.setText("");
         lastSpokenText = text;
         audioManagerFacade.speakText(text, activeVoiceProfile);
         renderAudioState();
         scrollToBottom();
+
+        // --- NEW: Send manually typed text to Python Agent ---
+        try {
+            org.json.JSONObject msg = new org.json.JSONObject();
+            msg.put("user_id", "test_user_001");
+            msg.put("text", text);
+            if (liveAgentClient != null) {
+                liveAgentClient.sendText(msg.toString());
+            }
+        } catch (Exception e) {
+            Log.e("ChatActivity", "Failed to send to agent", e);
+        }
     }
 
     private void appendIncomingMessage(String text) {
@@ -334,7 +356,7 @@ public class ChatActivity extends AppCompatActivity {
                 );
 
         currentMessages.add(message);
-        chatAdapter.submitList(currentMessages);
+        chatAdapter.submitList(new ArrayList<>(currentMessages));
         liveTranscript = "";
         renderAudioState();
         scrollToBottom();
